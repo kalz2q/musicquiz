@@ -1984,6 +1984,10 @@ export default function Home() {
   ];
 
   // ここから
+  useEffect(() => {
+    document.title = "曲当てクイズ";
+  }, []);
+
   const [currentSongIndex, setCurrentSongIndex] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
 
