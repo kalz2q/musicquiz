@@ -2049,9 +2049,11 @@ export default function Home() {
               controls
             ></audio>
           </div>
-          <button onClick={() => setShowAnswer(true)}>正解を表示</button>
-          <p className=""></p>
-          <button onClick={handleNext}>次の問題に行く</button>
+          <div className="flex justify-between">
+            <button onClick={() => setShowAnswer(true)}>正解を表示</button>
+            <p className=""></p>
+            <button onClick={handleNext}>次の問題に行く</button>
+          </div>
         </div>
         {showAnswer && (
           <div>
