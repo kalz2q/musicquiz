@@ -1981,9 +1981,37 @@ export default function Home() {
       info: "",
       filename: "上を向いて歩こう",
     },
+    {
+      title:
+        "あら野のはてに(あらののはてにゆうひはおちて クリスマス 讃美歌 グロリア)",
+      info: "",
+      filename: "あら野のはてに",
+    },
+    {
+      title: "女心の歌(おんなごころのうた ヴェルディリゴレット クラシック)",
+      info: "",
+      filename: "女心の歌",
+    },
+    {
+      title:
+        "イパネマの娘(The Girl from Ipanema 洋楽 ボサ・ノヴァ ブラジル アントニオ・カルロス・ジョビン)",
+      info: "",
+      filename: "イパネマの娘",
+    },
+    {
+      title: "亜麻色の髪の乙女(ドビュッシー クラシック)",
+      info: "",
+      filename: "亜麻色の髪の乙女ドビュッシー",
+    },
+    {
+      title: "華麗なる大円舞曲(ショパン クラシック)",
+      info: "",
+      filename: "華麗なる大円舞曲",
+    },
   ];
 
   // ここから
+
   useEffect(() => {
     document.title = "曲当てクイズ";
   }, []);
