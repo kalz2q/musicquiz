@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 // 曲当てクイズ
 
 export default function Home() {
@@ -4690,15 +4690,16 @@ export default function Home() {
     }
   };
 
-  useEffect(() => {
-    function shuffleList(list: MusicData[]) {
-      return list
-        .map((a) => ({ sort: Math.random(), value: a }))
-        .sort((a, b) => a.sort - b.sort)
-        .map((a) => a.value);
-    }
-    setMusicData(shuffleList(initialData));
+  const shuffleList = useCallback((list: MusicData[]) => {
+    return list
+      .map((a) => ({ sort: Math.random(), value: a }))
+      .sort((a, b) => a.sort - b.sort)
+      .map((a) => a.value);
   }, []);
+
+  useEffect(() => {
+    setMusicData((currentData) => shuffleList(currentData)); // 最新の musicData を受け取る
+  }, [shuffleList]); // shuffleList だけ依存配列に追加
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-indigo-100 py-8 px-4">
