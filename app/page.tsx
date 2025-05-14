@@ -4699,6 +4699,7 @@ export default function Home() {
 
   useEffect(() => {
     setMusicData((currentData) => shuffleList(currentData)); // 最新の musicData を受け取る
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shuffleList]); // shuffleList だけ依存配列に追加
 
   return (
