@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 // 曲当てクイズ
 
 export default function Home() {
@@ -4668,27 +4668,14 @@ export default function Home() {
 
   const [currentSongIndex, setCurrentSongIndex] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const audioRef = useRef<HTMLAudioElement>(null);
 
   const handleNext = () => {
     setShowAnswer(false);
-    setIsPlaying(false);
+
     setCurrentSongIndex((prevIndex) => (prevIndex + 1) % musicData.length);
   };
 
   const [musicData, setMusicData] = useState<MusicData[]>(initialData);
-
-  const handlePlay = () => {
-    if (audioRef.current) {
-      if (isPlaying) {
-        audioRef.current.pause();
-      } else {
-        audioRef.current.play();
-      }
-      setIsPlaying(!isPlaying);
-    }
-  };
 
   useEffect(() => {
     function shuffleList(list: MusicData[]) {
@@ -4703,11 +4690,6 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-indigo-100 py-8 px-4">
       <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-md overflow-hidden p-6">
-        {/* // <div className="min-h-screen bg-gradient-to-b from-blue-50 to-indigo-100 py-8 px-4">
-    //   <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-md overflow-hidden p-6"> */}
-        {/* <div className="min-h-screen bg-gradient-to-b from-blue-50 to-indigo-100 p-0">
-  <div className="w-full h-full bg-white shadow-md overflow-hidden p-4"> */}
-
         <h1 className="text-3xl font-bold text-center text-indigo-700 mb-6">
           曲当てクイズ
         </h1>
@@ -4718,30 +4700,15 @@ export default function Home() {
               曲を聴いて曲名を当ててみましょう
             </p>
 
-            <div className="w-full  bg-indigo-50 rounded-lg p-0 mb-3">
+            <div className="w-full max-w-md bg-indigo-50 rounded-lg p-4 mb-4">
               <audio
-                ref={audioRef}
                 className="w-full"
                 src={`${musicData[currentSongIndex].filename}.mp3`}
-                onEnded={() => setIsPlaying(false)}
                 controls
               />
             </div>
-            {/* ボタンコンテナ - 幅いっぱいに広げてflex justify-betweenで配置 */}
-            <div className="w-full flex justify-between mb-6">
-              {/* 左端のPlayボタン */}
-              <button
-                onClick={handlePlay}
-                className={`px-4 py-2 rounded-lg transition-colors ${
-                  isPlaying
-                    ? "bg-red-500 hover:bg-red-600 text-white"
-                    : "bg-green-500 hover:bg-green-600 text-white"
-                }`}
-              >
-                {isPlaying ? "Stop" : "Play"}
-              </button>
 
-              {/* 中央の正解表示ボタン */}
+            <div className="flex space-x-4 mb-6">
               <button
                 onClick={() => setShowAnswer(!showAnswer)}
                 className={`px-4 py-2 rounded-lg transition-colors ${
@@ -4752,8 +4719,6 @@ export default function Home() {
               >
                 {showAnswer ? "正解を隠す" : "正解を表示"}
               </button>
-
-              {/* 右端の次の問題ボタン */}
               <button
                 onClick={handleNext}
                 className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition-colors"

@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 // 曲当てクイズ
 
 export default function Home() {
@@ -4668,122 +4668,54 @@ export default function Home() {
 
   const [currentSongIndex, setCurrentSongIndex] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const audioRef = useRef<HTMLAudioElement>(null);
 
   const handleNext = () => {
     setShowAnswer(false);
-    setIsPlaying(false);
     setCurrentSongIndex((prevIndex) => (prevIndex + 1) % musicData.length);
   };
 
   const [musicData, setMusicData] = useState<MusicData[]>(initialData);
 
-  const handlePlay = () => {
-    if (audioRef.current) {
-      if (isPlaying) {
-        audioRef.current.pause();
-      } else {
-        audioRef.current.play();
-      }
-      setIsPlaying(!isPlaying);
-    }
-  };
+  function shuffleList(list: MusicData[]) {
+    return list
+      .map((a) => ({ sort: Math.random(), value: a }))
+      .sort((a, b) => a.sort - b.sort)
+      .map((a) => a.value);
+  }
 
   useEffect(() => {
-    function shuffleList(list: MusicData[]) {
-      return list
-        .map((a) => ({ sort: Math.random(), value: a }))
-        .sort((a, b) => a.sort - b.sort)
-        .map((a) => a.value);
-    }
-    setMusicData(shuffleList(initialData));
+    setMusicData(shuffleList(musicData));
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-indigo-100 py-8 px-4">
-      <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-md overflow-hidden p-6">
-        {/* // <div className="min-h-screen bg-gradient-to-b from-blue-50 to-indigo-100 py-8 px-4">
-    //   <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-md overflow-hidden p-6"> */}
-        {/* <div className="min-h-screen bg-gradient-to-b from-blue-50 to-indigo-100 p-0">
-  <div className="w-full h-full bg-white shadow-md overflow-hidden p-4"> */}
-
-        <h1 className="text-3xl font-bold text-center text-indigo-700 mb-6">
-          曲当てクイズ
-        </h1>
-
-        <div className="mb-8">
-          <div className="flex flex-col items-center mb-6">
-            <p className="text-lg text-gray-600 mb-4">
-              曲を聴いて曲名を当ててみましょう
-            </p>
-
-            <div className="w-full  bg-indigo-50 rounded-lg p-0 mb-3">
-              <audio
-                ref={audioRef}
-                className="w-full"
-                src={`${musicData[currentSongIndex].filename}.mp3`}
-                onEnded={() => setIsPlaying(false)}
-                controls
-              />
-            </div>
-            {/* ボタンコンテナ - 幅いっぱいに広げてflex justify-betweenで配置 */}
-            <div className="w-full flex justify-between mb-6">
-              {/* 左端のPlayボタン */}
-              <button
-                onClick={handlePlay}
-                className={`px-4 py-2 rounded-lg transition-colors ${
-                  isPlaying
-                    ? "bg-red-500 hover:bg-red-600 text-white"
-                    : "bg-green-500 hover:bg-green-600 text-white"
-                }`}
-              >
-                {isPlaying ? "Stop" : "Play"}
-              </button>
-
-              {/* 中央の正解表示ボタン */}
-              <button
-                onClick={() => setShowAnswer(!showAnswer)}
-                className={`px-4 py-2 rounded-lg transition-colors ${
-                  showAnswer
-                    ? "bg-green-500 hover:bg-green-600 text-white"
-                    : "bg-indigo-500 hover:bg-indigo-600 text-white"
-                }`}
-              >
-                {showAnswer ? "正解を隠す" : "正解を表示"}
-              </button>
-
-              {/* 右端の次の問題ボタン */}
-              <button
-                onClick={handleNext}
-                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition-colors"
-              >
-                次の問題 →
-              </button>
-            </div>
+    <div className="text-3xl">
+      <div className="">
+        <div className="">
+          <div>
+            <div>曲当てクイズ(Play ボタンを押して下さい)</div>
+            <audio
+              className="w-[70%]"
+              src={`${musicData[currentSongIndex].filename}.mp3`}
+              controls
+            ></audio>
           </div>
-
-          {showAnswer && (
-            <div className="bg-indigo-50 rounded-xl p-6 transition-all">
-              <div className="text-2xl font-semibold text-indigo-800 mb-4">
-                {musicData[currentSongIndex].title}
-              </div>
-              <div className="flex justify-center">
-                <Image
-                  src={`${musicData[currentSongIndex].filename}.svg`}
-                  alt="music sheet"
-                  width={800}
-                  height={200}
-                  className="rounded-lg shadow"
-                />
-              </div>
-            </div>
-          )}
+          <div className="flex justify-between">
+            <button onClick={() => setShowAnswer(true)}>正解を表示</button>
+            <p className=""></p>
+            <button onClick={handleNext}>次の問題に行く</button>
+          </div>
         </div>
-
-        <div className="text-center text-gray-500 text-sm">
-          問題 {currentSongIndex + 1} / {musicData.length}
-        </div>
+        {showAnswer && (
+          <div>
+            <div className="text-xl">{musicData[currentSongIndex].title}</div>
+            <Image
+              src={`${musicData[currentSongIndex].filename}.svg`}
+              alt="music sheet"
+              width={4000}
+              height={100}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
