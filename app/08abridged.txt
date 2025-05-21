@@ -1,0 +1,176 @@
+"use client";
+import Image from "next/image";
+import React, { useEffect, useState, useRef, useCallback } from "react";
+// 曲当てクイズ
+
+export default function Home() {
+  interface MusicData {
+    title: string;
+    info: string;
+    filename: string;
+  }
+
+  const initialData: MusicData[] = [
+    {
+      title:
+        "埴生の宿(はにゅうのやどもわがやどたまのよそいうらやまじ 童謡・唱歌)",
+      info: "",
+      filename: "埴生の宿",
+    },
+    {
+      title: "同期の桜(おまえとおれとはどうきのさくら 軍歌・戦時歌謡)",
+      info: "",
+      filename: "同期の桜",
+    },
+    {
+      title: "ラジオ体操の歌(藤山一郎 童謡・唱歌 1951 大中恩)",
+      info: "",
+      filename: "ラジオ体操の歌",
+    },
+    {
+      title: "クシコス・ポスト(ネッケ 運動会 クラシック Csikos Post)",
+      info: "",
+      filename: "クシコスポスト",
+    },
+    {
+      title: "冬のソナタ(最初から今まで 冬ソナ NHK 韓国ドラマ テレビ)",
+      info: "",
+      filename: "冬のソナタ",
+    },
+    {
+      title: "叱られて(しかられてあのこはまちまでおつかいに 童謡・唱歌)",
+      info: "",
+      filename: "叱られて",
+    },
+  ];
+
+  // ここから
+
+  useEffect(() => {
+    document.title = "曲当てクイズ";
+  }, []);
+
+  const [currentSongIndex, setCurrentSongIndex] = useState(0);
+  const [showAnswer, setShowAnswer] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement>(null);
+
+  const handleNext = () => {
+    setShowAnswer(false);
+    setIsPlaying(false);
+    setCurrentSongIndex((prevIndex) => (prevIndex + 1) % musicData.length);
+  };
+
+  const [musicData, setMusicData] = useState<MusicData[]>(initialData);
+
+  const handlePlay = () => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+
+  const shuffleList = useCallback((list: MusicData[]) => {
+    return list
+      .map((a) => ({ sort: Math.random(), value: a }))
+      .sort((a, b) => a.sort - b.sort)
+      .map((a) => a.value);
+  }, []);
+
+  useEffect(() => {
+    setMusicData((currentData) => shuffleList(currentData)); // 最新の musicData を受け取る
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shuffleList]); // shuffleList だけ依存配列に追加
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-indigo-100 py-8 px-4">
+      <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-md overflow-hidden p-6">
+        {/* // <div className="min-h-screen bg-gradient-to-b from-blue-50 to-indigo-100 py-8 px-4">
+    //   <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-md overflow-hidden p-6"> */}
+        {/* <div className="min-h-screen bg-gradient-to-b from-blue-50 to-indigo-100 p-0">
+  <div className="w-full h-full bg-white shadow-md overflow-hidden p-4"> */}
+
+        <h1 className="text-3xl font-bold text-center text-indigo-700 mb-6">
+          曲当てクイズ
+        </h1>
+
+        <div className="mb-8">
+          <div className="flex flex-col items-center mb-6">
+            <p className="text-lg text-gray-600 mb-4">
+              曲を聴いて曲名を当ててみましょう
+            </p>
+
+            <div className="w-full  bg-indigo-50 rounded-lg p-0 mb-3">
+              <audio
+                ref={audioRef}
+                className="w-full"
+                src={`${musicData[currentSongIndex].filename}.mp3`}
+                onEnded={() => setIsPlaying(false)}
+                controls
+              />
+            </div>
+            {/* ボタンコンテナ - 幅いっぱいに広げてflex justify-betweenで配置 */}
+            <div className="w-full flex justify-between mb-6">
+              {/* 左端のPlayボタン */}
+              <button
+                onClick={handlePlay}
+                className={`px-4 py-2 rounded-lg transition-colors ${
+                  isPlaying
+                    ? "bg-red-500 hover:bg-red-600 text-white"
+                    : "bg-green-500 hover:bg-green-600 text-white"
+                }`}
+              >
+                {isPlaying ? "Stop" : "Play"}
+              </button>
+
+              {/* 中央の正解表示ボタン */}
+              <button
+                onClick={() => setShowAnswer(!showAnswer)}
+                className={`px-4 py-2 rounded-lg transition-colors ${
+                  showAnswer
+                    ? "bg-green-500 hover:bg-green-600 text-white"
+                    : "bg-indigo-500 hover:bg-indigo-600 text-white"
+                }`}
+              >
+                {showAnswer ? "正解を隠す" : "正解を表示"}
+              </button>
+
+              {/* 右端の次の問題ボタン */}
+              <button
+                onClick={handleNext}
+                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition-colors"
+              >
+                次の問題 →
+              </button>
+            </div>
+          </div>
+
+          {showAnswer && (
+            <div className="bg-indigo-50 rounded-xl p-6 transition-all">
+              <div className="text-2xl font-semibold text-indigo-800 mb-4">
+                {musicData[currentSongIndex].title}
+              </div>
+              <div className="flex justify-center">
+                <Image
+                  src={`${musicData[currentSongIndex].filename}.svg`}
+                  alt="music sheet"
+                  width={800}
+                  height={200}
+                  className="rounded-lg shadow"
+                />
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="text-center text-gray-500 text-sm">
+          問題 {currentSongIndex + 1} / {musicData.length}
+        </div>
+      </div>
+    </div>
+  );
+}

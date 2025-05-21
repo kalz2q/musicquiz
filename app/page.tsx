@@ -4660,8 +4660,6 @@ export default function Home() {
     //
   ];
 
-  // ここから
-
   useEffect(() => {
     document.title = "曲当てクイズ";
   }, []);
@@ -4670,14 +4668,17 @@ export default function Home() {
   const [showAnswer, setShowAnswer] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const [musicData, setMusicData] = useState<MusicData[]>(initialData);
+  const [searchTerm, setSearchTerm] = useState(""); // 検索キーワード
+  const [searchResults, setSearchResults] = useState<number[]>([]); // 検索結果のインデックス
 
   const handleNext = () => {
     setShowAnswer(false);
     setIsPlaying(false);
     setCurrentSongIndex((prevIndex) => (prevIndex + 1) % musicData.length);
+    setSearchResults([]); // 次の問題へ行ったら検索結果をクリア
+    setSearchTerm(""); // 検索キーワードもクリア
   };
-
-  const [musicData, setMusicData] = useState<MusicData[]>(initialData);
 
   const handlePlay = () => {
     if (audioRef.current) {
@@ -4702,14 +4703,55 @@ export default function Home() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shuffleList]); // shuffleList だけ依存配列に追加
 
+  const handleSearch = () => {
+    if (searchTerm.trim() === "") {
+      setSearchResults([]); // 検索キーワードが空の場合は結果をクリア
+      alert("検索キーワードを入力してください。");
+      return;
+    }
+
+    const lowerCaseSearchTerm = searchTerm.toLowerCase();
+    const hits: number[] = [];
+
+    musicData.forEach((music, index) => {
+      const fullText = (music.title + music.info).toLowerCase();
+      if (fullText.includes(lowerCaseSearchTerm)) {
+        hits.push(index);
+      }
+    });
+
+    if (hits.length > 0) {
+      setSearchResults(hits);
+      setCurrentSongIndex(hits[0]); // 最初のヒット曲を再生対象にする
+      setShowAnswer(false); // 検索したら回答は非表示に
+      setIsPlaying(false); // 再生を停止（検索結果が変わったので）
+      alert(
+        `${hits.length}件の検索結果が見つかりました。最初の曲を再生します。`
+      );
+    } else {
+      setSearchResults([]);
+      alert("該当する曲は見つかりませんでした。");
+    }
+  };
+
+  const handleSearchNext = () => {
+    if (searchResults.length > 1) {
+      const currentIndexInResults = searchResults.indexOf(currentSongIndex);
+      const nextIndexInResults =
+        (currentIndexInResults + 1) % searchResults.length;
+      setCurrentSongIndex(searchResults[nextIndexInResults]);
+      setShowAnswer(false);
+      setIsPlaying(false);
+    } else if (searchResults.length === 1) {
+      alert("検索結果は1件のみです。");
+    } else {
+      alert("検索結果がありません。");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-indigo-100 py-8 px-4">
       <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-md overflow-hidden p-6">
-        {/* // <div className="min-h-screen bg-gradient-to-b from-blue-50 to-indigo-100 py-8 px-4">
-    //   <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-md overflow-hidden p-6"> */}
-        {/* <div className="min-h-screen bg-gradient-to-b from-blue-50 to-indigo-100 p-0">
-  <div className="w-full h-full bg-white shadow-md overflow-hidden p-4"> */}
-
         <h1 className="text-3xl font-bold text-center text-indigo-700 mb-6">
           曲当てクイズ
         </h1>
@@ -4721,13 +4763,15 @@ export default function Home() {
             </p>
 
             <div className="w-full  bg-indigo-50 rounded-lg p-0 mb-3">
-              <audio
-                ref={audioRef}
-                className="w-full"
-                src={`${musicData[currentSongIndex].filename}.mp3`}
-                onEnded={() => setIsPlaying(false)}
-                controls
-              />
+              {musicData.length > 0 && ( // musicDataが空でないことを確認
+                <audio
+                  ref={audioRef}
+                  className="w-full"
+                  src={`${musicData[currentSongIndex].filename}.mp3`}
+                  onEnded={() => setIsPlaying(false)}
+                  controls
+                />
+              )}
             </div>
             {/* ボタンコンテナ - 幅いっぱいに広げてflex justify-betweenで配置 */}
             <div className="w-full flex justify-between mb-6">
@@ -4763,28 +4807,49 @@ export default function Home() {
                 次の問題 →
               </button>
             </div>
+
+            {/* 検索機能の追加 - 1行にまとめる */}
+            <div className="w-full flex items-center gap-2 mt-4">
+              <input
+                type="text"
+                placeholder="曲名や情報で検索..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="flex-grow p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+              <button
+                onClick={handleSearch}
+                className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors whitespace-nowrap"
+              >
+                検索
+              </button>
+              <button
+                onClick={handleSearchNext}
+                className="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition-colors whitespace-nowrap"
+                disabled={searchResults.length <= 1}
+              >
+                次の検索結果 →
+              </button>
+            </div>
           </div>
 
-          {showAnswer && (
-            <div className="bg-indigo-50 rounded-xl p-6 transition-all">
-              <div className="text-2xl font-semibold text-indigo-800 mb-4">
-                {musicData[currentSongIndex].title}
+          {showAnswer &&
+            musicData.length > 0 && ( // musicDataが空でないことを確認
+              <div className="bg-indigo-50 rounded-xl p-6 transition-all">
+                <div className="text-2xl font-semibold text-indigo-800 mb-4">
+                  {musicData[currentSongIndex].title}
+                </div>
+                <div className="flex justify-center">
+                  <Image
+                    src={`${musicData[currentSongIndex].filename}.svg`}
+                    alt="music sheet"
+                    width={800}
+                    height={200}
+                    className="rounded-lg shadow"
+                  />
+                </div>
               </div>
-              <div className="flex justify-center">
-                <Image
-                  src={`${musicData[currentSongIndex].filename}.svg`}
-                  alt="music sheet"
-                  width={800}
-                  height={200}
-                  className="rounded-lg shadow"
-                />
-              </div>
-            </div>
-          )}
-        </div>
-
-        <div className="text-center text-gray-500 text-sm">
-          問題 {currentSongIndex + 1} / {musicData.length}
+            )}
         </div>
       </div>
     </div>
